@@ -5,6 +5,17 @@ import sqlite3
 #readline.set_auto_history(True)
 verbose = False
 
+print(
+    "Group 46 presents..."
+    "\n",
+    " ____ ______________     __________               \n",
+    "|    |   \__    ___/     \______   \_____  .__.__.\n",
+    "|    |   | |    |  ______ |     ___/\__  \ |  |  |\n",
+    "|    |   | |    | /_____/ |    |     / __ \|___  |\n",
+    "|________| |____|         |____|    (____  / ____|\n",
+    "                                         \/\/     ",
+)
+
 sql_con = sqlite3.connect("data.db")
 sql_cursor = sql_con.cursor()
 sql_cursor.execute("CREATE TABLE IF NOT EXISTS cards(hash PRIMARY KEY, credit)")
