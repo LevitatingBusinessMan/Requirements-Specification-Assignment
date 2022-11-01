@@ -1,6 +1,6 @@
 import serial
 import sqlite3
-#import pyreadline3
+#import readline
 
 #readline.set_auto_history(True)
 verbose = False
