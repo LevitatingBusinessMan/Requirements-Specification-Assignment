@@ -1,6 +1,9 @@
 import serial
 import sqlite3
 import bcrypt
+import os
+from time import sleep
+import sys
 from Crypto.Cipher import AES
 
 verbose = False
@@ -14,11 +17,16 @@ sql_con = sqlite3.connect("data.db")
 sql_cursor = sql_con.cursor()
 sql_cursor.execute("CREATE TABLE IF NOT EXISTS cards(hash PRIMARY KEY, credit)")
 
+ser = serial.Serial("/dev/ttyACM0", 9600)
+
 def blue(str): return f"\033[34m{str}\033[0m"
 def red(str): return f"\033[31m{str}\033[0m"
 def yellow(str): return f"\033[93m{str}\033[0m"
 def gray(str): return f"\033[90m{str}\033[0m"
 def green(str): return f"\033[32m{str}\033[0m"
+
+def hexstring(b):
+    return ":".join("{:02x}".format(c) for c in b)
 
 def sql(query):
     global verbose
@@ -28,13 +36,22 @@ def sql(query):
     return res
 
 def get_rfid():
-    ser = serial.Serial("/dev/ttyACM1", 9600)
+    global ser
+    canary = os.urandom(4)
     ser.reset_input_buffer()
+    ser.write(canary)
+    ser.flush()
     data = ser.read(16)
-    if data:
-        uid = aes.decrypt(data).split(b'\x00')[0]
-        hash = bcrypt.hashpw(uid, BCRYPT_SALT)
-        return hash.decode()
+    res = aes.decrypt(data).split(b'\x00')[0]
+    uid = res[:4]
+    bcanary = res[4:]
+
+    if canary != bcanary:
+        print(red(f"Canary not correct ({hexstring(canary)} != {hexstring(bcanary)})"))
+        return None
+
+    hash = bcrypt.hashpw(uid, BCRYPT_SALT)
+    return hash.decode()
 
 def register(uid):
     sql(f"INSERT INTO cards VALUES ('{uid}', 0)")
@@ -91,6 +108,11 @@ def main():
         "                                         \/\/     ",
     )
 
+    print("Opening serial...",end='')
+    sys.stdout.flush()
+    sleep(2)
+    print("\r" + " "*20 + "\r",end='')
+    sys.stdout.flush()
     while True:
         print(blue("> "), end='')
         
@@ -106,7 +128,7 @@ def main():
         match cmd:
             case "read":
                 uid, credit = read()
-                print(f"{uid}: {credit} credit")
+                print(f"{uid[-31:]}: {credit} credit")
 
             case "add":
                 try: 

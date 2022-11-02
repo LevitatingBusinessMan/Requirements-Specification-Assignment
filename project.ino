@@ -19,18 +19,21 @@ void setup() {
 }
 
 void loop() {
+  if (Serial.available() < 4) return;
+  uint8_t canary[4] = {0};
+  Serial.readBytes(canary, 4);
+
   uint32_t uid = rfid.readUID();
-  
-  //char buf[10];
-  //itoa(uid, buf, 16);
 
   inbuf[0] = uid;
   inbuf[1] = uid >> 8;
   inbuf[2] = uid >> 16;
   inbuf[3] = uid >> 24;
-  
+
+  memcpy(inbuf + 4, canary, 4);
+
   aes.encryptBlock(outbuf,inbuf);
 
   Serial.write(outbuf,16);
-
+  Serial.flush();
 }
