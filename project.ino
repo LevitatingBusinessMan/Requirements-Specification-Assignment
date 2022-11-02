@@ -8,7 +8,6 @@ RFID rfid;
 uint8_t key[KEYLENGTH] = {0xd7, 0xe7, 0xeb, 0x9e, 0x4c, 0xce, 0x25, 0x43, 0x62, 0x91, 0x1b, 0xdd, 0x3d, 0xf2, 0x16, 0xb2};
 
 AES128 aes = AES128();
-uint8_t block[16] = {0};
 
 void setup() {
   Serial.begin(9600);
@@ -19,7 +18,10 @@ void setup() {
 
 void loop() {
   if (Serial.available() < 4) return;
+
   uint8_t canary[4] = {0};
+  uint8_t block[16] = {0};
+  
   Serial.readBytes(canary, 4);
 
   uint32_t uid = rfid.readUID();

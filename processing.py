@@ -51,7 +51,8 @@ def get_rfid():
         return None
 
     hash = bcrypt.hashpw(uid, BCRYPT_SALT)
-    return hash.decode()
+    # Return just the hash, not the salt (and rounds)
+    return hash.decode()[-31:]
 
 def register(uid):
     sql(f"INSERT INTO cards VALUES ('{uid}', 0)")
@@ -128,7 +129,7 @@ def main():
         match cmd:
             case "read":
                 uid, credit = read()
-                print(f"{uid[-31:]}: {credit} credit")
+                print(f"{uid}: {credit} credit")
 
             case "add":
                 try: 
