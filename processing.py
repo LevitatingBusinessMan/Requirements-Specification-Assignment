@@ -43,11 +43,13 @@ def get_rfid():
     ser.flush()
     data = ser.read(16)
     res = aes.decrypt(data).split(b'\x00')[0]
+    xorred_uid = res[:4]
+    canary = res[4:]
     uid = bytes(c ^ k for c, k in zip(res,IV))
 
-    # if canary != bcanary:
-        # print(red(f"Canary not correct ({hexstring(canary)} != {hexstring(bcanary)})"))
-        # return None
+    if IV != canary:
+        print(red(f"Canary not correct ({hexstring(IV)} != {hexstring(canary)})"))
+        return None
 
     hash = bcrypt.hashpw(uid, BCRYPT_SALT)
     # Return just the hash, not the salt (and rounds)

@@ -31,7 +31,8 @@ void loop() {
   block[2] = (uid >> 16) ^ IV[2];
   block[3] = (uid >> 24) ^ IV[3];
 
-  //memcpy(block + 4, IV, 4);
+  // Add the IV to the plaintext as a canary
+  memcpy(block + 4, IV, 4);
 
   aes.encryptBlock(block,block);
 
