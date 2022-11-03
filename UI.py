@@ -166,7 +166,7 @@ def transaction_ui():
             uid, result = processing.pay(int(amount))
             if result >= 0:
                 window.close()
-                transaction_succesfull_uir(uid, result)
+                transaction_succesfull_ui(uid, result)
                 break
             elif result < 0:
                 window.close()
