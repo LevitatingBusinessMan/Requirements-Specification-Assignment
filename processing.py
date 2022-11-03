@@ -59,6 +59,12 @@ def register(uid):
     sql(f"INSERT INTO cards VALUES ('{uid}', 0)")
     print(f"Registered {uid}")
 
+def remove():
+    uid = get_rfid()
+    credit = getcredit(uid)
+    sql(f"DELETE FROM cards WHERE hash='{uid}'")
+    return uid
+
 def getcredit(uid):
     res = sql(f"SELECT credit FROM cards WHERE hash = '{uid}'").fetchone()
     if res is None:
@@ -155,6 +161,10 @@ def main():
                     continue
 
                 print(f"New credit: {credit}")
+
+            case "remove":
+                uid = remove()
+                print(f"Removed {uid}")
 
             case "debug":
                 verbose = not verbose
