@@ -19,19 +19,19 @@ void setup() {
 void loop() {
   if (Serial.available() < 4) return;
 
-  uint8_t canary[4] = {0};
+  uint8_t IV[4] = {0};
   uint8_t block[16] = {0};
   
-  Serial.readBytes(canary, 4);
+  Serial.readBytes(IV, 4);
 
   uint32_t uid = rfid.readUID();
 
-  block[0] = uid;
-  block[1] = uid >> 8;
-  block[2] = uid >> 16;
-  block[3] = uid >> 24;
+  block[0] = uid ^ IV[0];
+  block[1] = (uid >> 8) ^ IV[1];
+  block[2] = (uid >> 16) ^ IV[2];
+  block[3] = (uid >> 24) ^ IV[3];
 
-  memcpy(block + 4, canary, 4);
+  //memcpy(block + 4, IV, 4);
 
   aes.encryptBlock(block,block);
 

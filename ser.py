@@ -9,20 +9,19 @@ aes = AES.new(AES_KEY, AES.MODE_ECB)
 
 ser = serial.Serial("/dev/ttyACM0", 9600)
 time.sleep(2)
-canary = os.urandom(4)
-print("Canary: ", end='')
-print(canary)
-ser.write(canary)
+IV = os.urandom(4)
+print("IV: ", end='')
+print(IV)
+ser.write(IV)
 ser.flush()
 data = ser.read(16)
 print(aes.decrypt(data))
 print(aes.decrypt(data).split(b'\x00')[0])
 
 res = aes.decrypt(data).split(b'\x00')[0]
-uid = res[:4]
-bcanary = res[4:]
+uid = bytes(c ^ k for c, k in zip(res,IV))
 
 print("uid: " + ":".join("{:02x}".format(c) for c in uid))
-print("canary: " + ":".join("{:02x}".format(c) for c in bcanary))
+#print("canary: " + ":".join("{:02x}".format(c) for c in bcanary))
 
-print("Correct canary? " + str(canary == bcanary))
+#print("Correct canary? " + str(canary == bcanary))

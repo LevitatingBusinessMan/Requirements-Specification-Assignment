@@ -37,18 +37,17 @@ def sql(query):
 
 def get_rfid():
     global ser
-    canary = os.urandom(4)
+    IV = os.urandom(4)
     ser.reset_input_buffer()
-    ser.write(canary)
+    ser.write(IV)
     ser.flush()
     data = ser.read(16)
     res = aes.decrypt(data).split(b'\x00')[0]
-    uid = res[:4]
-    bcanary = res[4:]
+    uid = bytes(c ^ k for c, k in zip(res,IV))
 
-    if canary != bcanary:
-        print(red(f"Canary not correct ({hexstring(canary)} != {hexstring(bcanary)})"))
-        return None
+    # if canary != bcanary:
+        # print(red(f"Canary not correct ({hexstring(canary)} != {hexstring(bcanary)})"))
+        # return None
 
     hash = bcrypt.hashpw(uid, BCRYPT_SALT)
     # Return just the hash, not the salt (and rounds)
